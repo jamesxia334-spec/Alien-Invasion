@@ -296,15 +296,30 @@ class AlienInvasion:
         self.settings.fleet_direction *= -1
 
 
+
     def _close_game(self):
-        """Save high score and exit."""
-        saved_high_score = self.stats.get_saved_high_score()
+        """Save the high score (with player name) and exit the game."""
+        saved = self.stats.get_saved_high_score()
+        saved_high_score = saved["score"]
+
         if self.stats.high_score > saved_high_score:
+            player_name = self.sb.prompt_high_score_name()
+
+            # Write the new high score record to JSON file
             path = Path('high_score.json')
-            contents = json.dumps(self.stats.high_score)
-            path.write_text(contents)
-        
+            contents = json.dumps(
+                {"score": int(self.stats.high_score), "name": player_name},
+                ensure_ascii=False
+            )
+            path.write_text(contents, encoding="utf-8")
+
+            # Update the current UI to show the player name immediately
+            # (in case the screen is redrawn before exiting)
+            self.stats.high_score_name = player_name
+            self.sb.prep_high_score()
+
         sys.exit()
+
 
 
 if __name__ == "__main__":

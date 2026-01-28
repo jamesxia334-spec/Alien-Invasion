@@ -13,13 +13,13 @@ class Scoreboard:
         self.screen_rect = self.screen.get_rect()
         self.settings = ai_game.settings
         self.stats = ai_game.stats
+        self.clock = pygame.time.Clock()
 
         # Font settings for scoring information.
         self.text_color = (30, 30, 30)
         self.font = pygame.font.SysFont(None, 48)
+        self.small_font = pygame.font.SysFont(None, 32)
 
-
-        
         self.prep_images()
 
 
@@ -51,12 +51,14 @@ class Scoreboard:
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
         high_score = round(self.stats.high_score, -1)
-        high_score_str = "High Score: " + f"{high_score:,}"
+        name = getattr(self.stats, "high_score_name", "someone").strip()
+
+        high_score_str = "High Score: " + f"{high_score:,}" + f" ({name})"
+
         self.high_score_image = self.font.render(
             high_score_str, True,
             self.text_color, self.settings.bg_color)
 
-        # Center the high score at the top of the screen.
         self.high_score_rect = self.high_score_image.get_rect()
         self.high_score_rect.centerx = self.screen_rect.centerx
         self.high_score_rect.top = self.score_rect.top
@@ -88,6 +90,7 @@ class Scoreboard:
         """Check to see if there's a new high score."""
         if self.stats.score > self.stats.high_score:
             self.stats.high_score = self.stats.score
+            self.stats.high_score_name = ''
             self.prep_high_score()
 
 
@@ -100,5 +103,77 @@ class Scoreboard:
 
 
 
+    def prompt_high_score_name(self):
+        """Ask the player to enter a name in-game and return it as a string."""
+
+        name = ""
+        entering = True
+
+        # Show mouse cursor for better user experience
+        pygame.mouse.set_visible(True)
+
+        while entering:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # Player closed the window directly
+                    entering = False
+
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        # Confirm input
+                        entering = False
+                    elif event.key == pygame.K_ESCAPE:
+                        # Cancel input
+                        name = ""
+                        entering = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        # Remove last character
+                        name = name[:-1]
+                    else:
+                        # Accept printable characters only and limit input length
+                        if event.unicode.isprintable() and len(name) < 20:
+                            name += event.unicode
+            self._draw_input_screen(name)
+            self.clock.tick(60)
+
+        return name.strip()
+    
+    def _draw_input_screen(self, name):
+        """ Draw the input screen."""
+        self.screen.fill(self.settings.bg_color)
+
+        title = self.font.render(
+            "New High Score!", True, (30, 30, 30), self.settings.bg_color
+        )
+        tip = self.small_font.render(
+            "Enter your name (Enter=OK, Esc=Skip):",
+            True, (30, 30, 30), self.settings.bg_color
+        )
+
+        # Blinking cursor effect
+        cursor = "_" if (pygame.time.get_ticks() // 400) % 2 == 0 else ""
+        shown = name + cursor
+        text = self.font.render(
+            shown, True, (30, 30, 30), self.settings.bg_color
+        )
+
+        title_rect = title.get_rect(
+            center=(self.settings.screen_width // 2,
+                    self.settings.screen_height // 2 - 120)
+        )
+        tip_rect = tip.get_rect(
+            center=(self.settings.screen_width // 2,
+                    self.settings.screen_height // 2 - 60)
+        )
+        text_rect = text.get_rect(
+            center=(self.settings.screen_width // 2,
+                    self.settings.screen_height // 2 + 10)
+        )
+
+        self.screen.blit(title, title_rect)
+        self.screen.blit(tip, tip_rect)
+        self.screen.blit(text, text_rect)
+
+        pygame.display.flip()
 
 
