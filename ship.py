@@ -25,15 +25,29 @@ class Ship(Sprite):
         self.moving_right = False
         self.moving_left = False
 
-    def update_ship_position(self):
+    def update(self):
         """Update the ship's position based on the movement flag."""
         # Update the ship's x value, not the rect.
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += self.settings.ship_speed
         if self.moving_left and self.rect.left > 0:
             self.x -= self.settings.ship_speed
-
         # Update rect object from self.x.
+        self.rect.x = self.x
+
+    def blink(self):
+        """Make the ship jump right or left and clamp at screen edges."""
+        # The ship should only blink if it's moving in one direction only.
+        if self.moving_right and not self.moving_left:
+            self.x += self.settings.ship_blink_distance
+        elif self.moving_left and not self.moving_right:
+            self.x -= self.settings.ship_blink_distance
+
+        # Clamp x so the ship never leaves the screen.
+        max_x = self.screen_rect.right - self.rect.width
+        self.x = max(0, min(self.x, max_x))
+
+        # Update rect object from self.x
         self.rect.x = self.x
 
     def blitme(self):

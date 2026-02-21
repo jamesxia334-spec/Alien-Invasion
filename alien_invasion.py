@@ -50,6 +50,7 @@ class AlienInvasion:
 
         # Make the Play button.
         self.play_button = Button(self, "Play")
+        self.d_pressed = False
 
 
 
@@ -60,7 +61,7 @@ class AlienInvasion:
             # Watch for keyboard and mouse events.
             self._check_events()
             if self.game_active:
-                self.ship.update_ship_position()
+                self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
             # Redraw the screen during each pass through the loop.
@@ -118,12 +119,20 @@ class AlienInvasion:
         """Respond to keypresses."""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
+            if self.d_pressed:
+                self.ship.blink()
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
+            if self.d_pressed:
+                self.ship.blink()
+
         if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
             self._close_game()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+        elif event.key == pygame.K_d:
+            self.d_pressed = True
+            self.ship.blink()
             
 
     def _check_keyup_events(self, event):
@@ -132,6 +141,8 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
+        elif event.key == pygame.K_d:
+            self.d_pressed = False
 
 
     def _fire_bullet(self):

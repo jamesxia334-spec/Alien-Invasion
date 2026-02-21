@@ -12,6 +12,7 @@ class Settings:
 
         # Ship settings
         self.ship_limit = 3
+        self.ship_blink_distance = 200
 
         # Bullet settings
         self.bullet_width = 3
