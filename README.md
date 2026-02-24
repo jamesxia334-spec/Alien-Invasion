@@ -2,6 +2,11 @@
 
 A small arcade shooter built with `pygame`.
 
+## Attribution
+
+This project is based on the **Alien Invasion** project from *Python Crash Course*.
+On top of the original tutorial scope, this version adds extra features and custom gameplay behavior.
+
 ## Features
 
 - Player ship movement and shooting
